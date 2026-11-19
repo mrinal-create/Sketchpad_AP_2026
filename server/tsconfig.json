@@ -14,5 +14,5 @@
   },
   "include": [
     "**/*.ts"
-  ]
+, "lib/prisma.js", "lib/auth.js"  ]
 }
