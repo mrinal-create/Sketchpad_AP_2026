@@ -1,10 +1,10 @@
-# 🎨 Sketchpad — A Web-Based Collaborative Design and Drawing Application
+# Sketchpad — A Web-Based Collaborative Design and Drawing Application
 
 Sketchpad is a web-based design and drawing application that provides users with an interactive canvas to create, edit, and organize visual designs directly in their browser. Inspired by modern digital design and prototyping tools, Sketchpad aims to provide a simple, intuitive, and accessible creative workspace.
 
 The application focuses on essential design features such as canvas-based editing, drawing tools, object manipulation, and an easy-to-use interface. It provides a foundation for developing creative ideas and exploring interactive design in a browser environment.
 
-## ✨ Features
+##  Features
 
 - **Interactive Canvas:** Create and edit designs in a browser-based workspace.
 - **Drawing Tools:** Draw and create visual elements on the canvas.
@@ -15,7 +15,7 @@ The application focuses on essential design features such as canvas-based editin
 - **User Authentication:** Planned support for personalized user accounts.
 - **Real-Time Collaboration:** Future support for multiple users working on the same design.
 
-## 🎯 Project Objectives
+##  Project Objectives
 
 - Develop an interactive, browser-based drawing and design application.
 - Provide essential tools for creating and editing visual designs.
@@ -24,7 +24,7 @@ The application focuses on essential design features such as canvas-based editin
 - Explore the development of practical design software.
 - Establish a foundation for future collaboration and design management features.
 
-## 🚀 Future Enhancements
+##  Future Enhancements
 
 - **Advanced Drawing Tools:** Add more shapes, text, colors, and freehand drawing options.
 - **Undo and Redo:** Reverse or restore previous canvas operations.
