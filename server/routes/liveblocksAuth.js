@@ -1,8 +1,9 @@
 import express from "express";
 import { Liveblocks } from "@liveblocks/node";
 import { requireAuth } from "../middleware/auth.js";
-import { prisma } from "../lib/prisma.js"; // Adjust path to your Prisma instance
-
+import { prisma } from "../lib/prisma.js";
+import dotenv from "dotenv";
+dotenv.config();
 const router = express.Router();
 
 const liveblocks = new Liveblocks({

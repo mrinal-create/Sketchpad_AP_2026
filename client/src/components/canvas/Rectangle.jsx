@@ -1,7 +1,9 @@
+/* === FEATURE 1: CREATING DIFFERENT SHAPES === */
+/* === FEATURE 3: CUSTOMIZATION (Fill, Stroke, Width, Style, CornerRadius, Opacity) === */
 import { colorToCss } from "../../utils";
 
 export default function Rectangle({ id, layer, onPointerDown }) {
-  const { x, y, width, height, fill, stroke, opacity, cornerRadius } = layer;
+  const { x, y, width, height, fill, stroke, opacity, cornerRadius, strokeWidth, strokeStyle } = layer;
 
   return (
     <g className="group">
@@ -20,8 +22,9 @@ export default function Rectangle({ id, layer, onPointerDown }) {
         width={width}
         height={height}
         fill={fill ? colorToCss(fill) : "#CCC"}
-        strokeWidth={1}
+        strokeWidth={strokeWidth ?? 1}
         stroke={stroke ? colorToCss(stroke) : "#CCC"}
+        strokeDasharray={strokeStyle === "dashed" ? "6 4" : undefined}
         opacity={`${opacity ?? 100}%`}
         rx={cornerRadius ?? 0}
         ry={cornerRadius ?? 0}

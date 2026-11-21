@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "./prisma.js"; 
+import { prisma } from "./prisma.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -9,8 +11,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5005",
-  trustedOrigins: ["http://10.7.27.149:5173"],
+  baseURL: process.env.BETTER_AUTH_URL || `http://localhost:${process.env.PORT || 5001}`,
+  trustedOrigins: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://10.7.2.133:5173",
+    process.env.CLIENT_URL,
+  ].filter(Boolean),
   onAPIError: {
     onError(error) {
       console.error("Better Auth Error:", error);

@@ -8,9 +8,41 @@ export function hexToRgb(hex) {
   const b = parseInt(hex.slice(5, 7), 16);
   return { r, g, b };
 }
-const COLORS = ["#DC2626", "#D97706", "#059669", "#7C3AED", "#DB2777"];
+
+const COLORS = [
+  "#E11D48", // Rose
+  "#2563EB", // Blue
+  "#059669", // Emerald
+  "#D97706", // Amber
+  "#7C3AED", // Violet
+  "#0891B2", // Cyan
+  "#DB2777", // Pink
+  "#EA580C", // Orange
+  "#4F46E5", // Indigo
+];
+
 export function connectionIdToColor(connectionId) {
-  return COLORS[connectionId % COLORS.length];
+  if (connectionId == null || isNaN(connectionId)) return COLORS[0];
+  const idx = Math.abs(connectionId) % COLORS.length;
+  return COLORS[idx];
+}
+
+export function formatRelativeTime(dateString) {
+  if (!dateString) return "just now";
+  try {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInSec = Math.floor((now - date) / 1000);
+    if (diffInSec < 60) return "just now";
+    const diffInMin = Math.floor(diffInSec / 60);
+    if (diffInMin < 60) return `${diffInMin}m ago`;
+    const diffInHours = Math.floor(diffInMin / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}d ago`;
+  } catch {
+    return "just now";
+  }
 }
 export function getLayer(layers, layerId) {
   if (!layers) return null;
@@ -50,7 +82,9 @@ export function resizeBounds(bounds, corner, point) {
   }
   return result;
 }
-export function penPointsToPathPayer(points, color) {
+
+/* === FEATURE 4: FREEFORM DRAWING === */
+export function penPointsToPathPayer(points, color, strokeWidth = 16) {
   let left = Number.POSITIVE_INFINITY;
   let top = Number.POSITIVE_INFINITY;
   let right = Number.NEGATIVE_INFINITY;
@@ -75,10 +109,11 @@ export function penPointsToPathPayer(points, color) {
     type: LayerType.Path,
     x: left,
     y: top,
-    height: bottom - top,
-    width: right - left,
+    height: Math.max(bottom - top, 1),
+    width: Math.max(right - left, 1),
     fill: color,
     stroke: color,
+    strokeWidth,
     opacity: 100,
     points: points
       .filter(
@@ -106,9 +141,10 @@ export function getSvgPathFromStroke(stroke) {
   return d.join(" ");
 }
 export const pointerEventToCanvasPoint = (e, camera) => {
+  const zoom = camera?.zoom || 1;
   return {
-    x: Math.round(e.clientX) - camera.x,
-    y: Math.round(e.clientY) - camera.y,
+    x: Math.round((e.clientX - camera.x) / zoom),
+    y: Math.round((e.clientY - camera.y) / zoom),
   };
 };
 export function findIntersectionLayersWithRectangle(layerIds, layers, a, b) {

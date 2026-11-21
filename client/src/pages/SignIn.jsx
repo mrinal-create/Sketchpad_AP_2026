@@ -14,19 +14,23 @@ export default function SignIn() {
     setErrorMessage("");
     setIsPending(true);
 
-    const { error } = await signIn.email({
-      email,
-      password,
-    });
+    try {
+      const { error } = await signIn.email({
+        email,
+        password,
+      });
 
-    setIsPending(false);
+      if (error) {
+        setErrorMessage(error.message || "Invalid email or password.");
+        return;
+      }
 
-    if (error) {
-      setErrorMessage(error.message || "Invalid email or password.");
-      return;
+      navigate("/dashboard");
+    } catch (err) {
+      setErrorMessage(err.message || "Sign in failed. Please check your connection.");
+    } finally {
+      setIsPending(false);
     }
-
-    navigate("/dashboard");
   }
 
   return (

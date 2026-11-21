@@ -1,8 +1,15 @@
+/* === FEATURE 1: CREATING DIFFERENT SHAPES === */
+/* === FEATURE 2: UPLOADING IMAGES === */
+/* === FEATURE 3: CUSTOMIZATION === */
+/* === FEATURE 4: FREEFORM DRAWING === */
+
 import { useMutation, useOthers, useSelf, useStorage } from "@liveblocks/react";
 import { Link } from "react-router";
 import { AiOutlineFontSize } from "react-icons/ai";
-import { IoEllipseOutline, IoSquareOutline } from "react-icons/io5";
+import { IoEllipseOutline, IoSquareOutline, IoTriangleOutline, IoStarOutline } from "react-icons/io5";
 import { PiPathLight, PiSidebarSimpleThin } from "react-icons/pi";
+import { BsCircleHalf, BsSlashLg, BsImage } from "react-icons/bs";
+import { RiRoundedCorner } from "react-icons/ri";
 import { LayerType } from "../../types";
 import {
   colorToCss,
@@ -12,12 +19,11 @@ import {
 } from "../../utils";
 import LayerButton from "./LayerButton";
 import NumberInput from "./NumberInput";
-import { BsCircleHalf } from "react-icons/bs";
-import { RiRoundedCorner } from "react-icons/ri";
 import ColorPicker from "./ColorPicker";
 import Dropdown from "./Dropdown";
 import UserAvatar from "./UserAvatar";
 import ShareMenu from "./ShareMenu";
+import ActiveUsers from "../canvas/ActiveUsers";
 
 export default function Sidebars({
   roomName,
@@ -25,6 +31,7 @@ export default function Sidebars({
   othersWithAccessToRoom,
   leftIsMinimized,
   setLeftIsMinimized,
+  onFocusUser,
 }) {
   const me = useSelf();
   const others = useOthers();
@@ -49,10 +56,12 @@ export default function Sidebars({
 
   const selection = useSelf((me) => me.presence.selection);
 
+  /* === FEATURE 3: CUSTOMIZATION (Canvas Background Color) === */
   const setRoomColor = useMutation(({ storage }, newColor) => {
     storage.set("roomColor", newColor);
   }, []);
 
+  /* === FEATURE 3: CUSTOMIZATION (Update Any Layer Property Reactively) === */
   const updateLayer = useMutation(
     ({ storage }, updates) => {
       if (!selectedLayer) return;
@@ -69,6 +78,12 @@ export default function Sidebars({
           ...(updates.opacity !== undefined && { opacity: updates.opacity }),
           ...(updates.cornerRadius !== undefined && {
             cornerRadius: updates.cornerRadius,
+          }),
+          ...(updates.strokeWidth !== undefined && {
+            strokeWidth: updates.strokeWidth,
+          }),
+          ...(updates.strokeStyle !== undefined && {
+            strokeStyle: updates.strokeStyle,
           }),
           ...(updates.fill !== undefined && { fill: hexToRgb(updates.fill) }),
           ...(updates.stroke !== undefined && {
@@ -89,9 +104,9 @@ export default function Sidebars({
 
   return (
     <>
-      {/* Left Sidebar */}
+      {/* Left Sidebar: Layers Panel */}
       {!leftIsMinimized ? (
-        <div className="fixed left-0 flex h-screen w-[240px] flex-col border-r border-gray-200 bg-white">
+        <div className="fixed left-0 z-20 flex h-screen w-[240px] flex-col border-r border-gray-200 bg-white">
           <div className="p-4">
             <div className="flex justify-between">
               <Link to="/dashboard">
@@ -103,7 +118,7 @@ export default function Sidebars({
               </Link>
               <PiSidebarSimpleThin
                 onClick={() => setLeftIsMinimized(true)}
-                className="h-5 w-5 cursor-pointer"
+                className="h-5 w-5 cursor-pointer text-gray-600 hover:text-black"
               />
             </div>
             <h2 className="mt-2 scroll-m-20 text-[13px] font-medium">
@@ -111,12 +126,14 @@ export default function Sidebars({
             </h2>
           </div>
           <div className="border-b border-gray-200" />
-          <div className="flex flex-col gap-1 p-4">
-            <span className="mb-2 text-[11px] font-medium">Layers</span>
+          <div className="flex flex-col gap-1 p-4 overflow-y-auto">
+            <span className="mb-2 text-[11px] font-medium text-gray-500">Layers</span>
             {layerIds &&
               reversedLayerIds.map((id) => {
                 const layer = getLayer(layers, id);
                 const isSelected = selection?.includes(id);
+
+                /* === FEATURE 1: CREATING DIFFERENT SHAPES (Layer representation in left panel) === */
                 if (layer?.type === LayerType.Rectangle) {
                   return (
                     <LayerButton
@@ -124,9 +141,7 @@ export default function Sidebars({
                       layerId={id}
                       text="Rectangle"
                       isSelected={isSelected ?? false}
-                      icon={
-                        <IoSquareOutline className="h-3 w-3 text-gray-500" />
-                      }
+                      icon={<IoSquareOutline className="h-3 w-3 text-gray-500" />}
                     />
                   );
                 } else if (layer?.type === LayerType.Ellipse) {
@@ -136,12 +151,56 @@ export default function Sidebars({
                       layerId={id}
                       text="Ellipse"
                       isSelected={isSelected ?? false}
-                      icon={
-                        <IoEllipseOutline className="h-3 w-3 text-gray-500" />
-                      }
+                      icon={<IoEllipseOutline className="h-3 w-3 text-gray-500" />}
                     />
                   );
-                } else if (layer?.type === LayerType.Path) {
+                } else if (layer?.type === LayerType.Triangle) {
+                  return (
+                    <LayerButton
+                      key={id}
+                      layerId={id}
+                      text="Triangle"
+                      isSelected={isSelected ?? false}
+                      icon={<IoTriangleOutline className="h-3 w-3 text-gray-500" />}
+                    />
+                  );
+                } else if (layer?.type === LayerType.Star) {
+                  return (
+                    <LayerButton
+                      key={id}
+                      layerId={id}
+                      text="Star"
+                      isSelected={isSelected ?? false}
+                      icon={<IoStarOutline className="h-3 w-3 text-gray-500" />}
+                    />
+                  );
+                } else if (layer?.type === LayerType.Line) {
+                  return (
+                    <LayerButton
+                      key={id}
+                      layerId={id}
+                      text="Line"
+                      isSelected={isSelected ?? false}
+                      icon={<BsSlashLg className="h-3 w-3 text-gray-500" />}
+                    />
+                  );
+                }
+
+                /* === FEATURE 2: UPLOADING IMAGES (Image layer item) === */
+                else if (layer?.type === LayerType.Image) {
+                  return (
+                    <LayerButton
+                      key={id}
+                      layerId={id}
+                      text="Image"
+                      isSelected={isSelected ?? false}
+                      icon={<BsImage className="h-3 w-3 text-gray-500" />}
+                    />
+                  );
+                }
+
+                /* === FEATURE 4: FREEFORM DRAWING (Drawing layer item) === */
+                else if (layer?.type === LayerType.Path) {
                   return (
                     <LayerButton
                       key={id}
@@ -158,17 +217,16 @@ export default function Sidebars({
                       layerId={id}
                       text="Text"
                       isSelected={isSelected ?? false}
-                      icon={
-                        <AiOutlineFontSize className="h-3 w-3 text-gray-500" />
-                      }
+                      icon={<AiOutlineFontSize className="h-3 w-3 text-gray-500" />}
                     />
                   );
                 }
+                return null;
               })}
           </div>
         </div>
       ) : (
-        <div className="fixed left-3 top-3 flex h-[48px] w-[250px] items-center justify-between rounded-xl border bg-white p-4">
+        <div className="fixed left-3 top-3 z-20 flex h-[48px] w-[250px] items-center justify-between rounded-xl border bg-white p-4">
           <Link to="/dashboard">
             <img
               src="/figma-logo.svg"
@@ -179,46 +237,34 @@ export default function Sidebars({
           <h2 className="scroll-m-20 text-[13px] font-medium">{roomName}</h2>
           <PiSidebarSimpleThin
             onClick={() => setLeftIsMinimized(false)}
-            className="h-5 w-5 cursor-pointer"
+            className="h-5 w-5 cursor-pointer text-gray-600 hover:text-black"
           />
         </div>
       )}
 
-      {/* Right Sidebar */}
+      {/* Right Sidebar: Properties Customization Panel */}
       {!leftIsMinimized || layer ? (
         <div
-          className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-3 top-3 rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-0 h-screen" : ""} right-0 flex w-[240px] flex-col border-l border-gray-200 bg-white`}
+          className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-3 top-3 rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-0 h-screen" : ""} right-0 z-20 flex w-[240px] flex-col border-l border-gray-200 bg-white overflow-y-auto`}
         >
-          <div className="flex items-center justify-between pr-2">
-            <div className="max-36 flex w-full gap-2 overflow-x-scroll p-3 text-xs">
-              {me && (
-                <UserAvatar
-                  color={connectionIdToColor(me.connectionId)}
-                  name={me.info.name}
-                />
-              )}
-              {others.map((other) => (
-                <UserAvatar
-                  key={other.connectionId}
-                  color={connectionIdToColor(other.connectionId)}
-                  name={other.info.name}
-                />
-              ))}
-            </div>
+          {/* Header & Avatars */}
+          <div className="flex items-center justify-between p-3 gap-2">
+            <ActiveUsers onFocusUser={onFocusUser} />
             <ShareMenu
               roomId={roomId}
               othersWithAccessToRoom={othersWithAccessToRoom}
             />
           </div>
           <div className="border-b border-gray-200"></div>
+
+          {/* === FEATURE 3: CUSTOMIZATION (Layer Customization Properties) === */}
           {layer ? (
             <>
+              {/* Position (X, Y) */}
               <div className="flex flex-col gap-2 p-4">
                 <span className="mb-2 text-[11px] font-medium">Position</span>
                 <div className="flex flex-col gap-1">
-                  <p className="text-[9px] font-medium text-gray-500">
-                    Position
-                  </p>
+                  <p className="text-[9px] font-medium text-gray-500">Position</p>
                   <div className="flex w-full gap-2">
                     <NumberInput
                       value={layer.x}
@@ -240,15 +286,14 @@ export default function Sidebars({
                 </div>
               </div>
 
+              {/* Dimensions (W, H) - Applicable to all except freeform Path */}
               {layer.type !== LayerType.Path && (
                 <>
                   <div className="border-b border-gray-200"></div>
                   <div className="flex flex-col gap-2 p-4">
                     <span className="mb-2 text-[11px] font-medium">Layout</span>
                     <div className="flex flex-col gap-1">
-                      <p className="text-[9px] font-medium text-gray-500">
-                        Dimensions
-                      </p>
+                      <p className="text-[9px] font-medium text-gray-500">Dimensions</p>
                       <div className="flex w-full gap-2">
                         <NumberInput
                           value={layer.width}
@@ -272,16 +317,15 @@ export default function Sidebars({
                 </>
               )}
 
+              {/* Appearance: Opacity & Corner Radius */}
               <div className="border-b border-gray-200"></div>
               <div className="flex flex-col gap-2 p-4">
                 <span className="mb-2 text-[11px] font-medium">Appearance</span>
                 <div className="flex w-full gap-2">
                   <div className="flex w-1/2 flex-col gap-1">
-                    <p className="text-[9px] font-medium text-gray-500">
-                      Opacity
-                    </p>
+                    <p className="text-[9px] font-medium text-gray-500">Opacity</p>
                     <NumberInput
-                      value={layer.opacity}
+                      value={layer.opacity ?? 100}
                       min={0}
                       max={100}
                       onChange={(number) => {
@@ -293,9 +337,7 @@ export default function Sidebars({
                   </div>
                   {layer.type === LayerType.Rectangle && (
                     <div className="flex w-1/2 flex-col gap-1">
-                      <p className="text-[9px] font-medium text-gray-500">
-                        Corner radius
-                      </p>
+                      <p className="text-[9px] font-medium text-gray-500">Corner radius</p>
                       <NumberInput
                         value={layer.cornerRadius ?? 0}
                         min={0}
@@ -310,33 +352,92 @@ export default function Sidebars({
                   )}
                 </div>
               </div>
-              <div className="border-b border-gray-200" />
-              <div className="flex flex-col gap-2 p-4">
-                <span className="mb-2 text-[11px] font-medium">Fill</span>
-                <ColorPicker
-                  value={colorToCss(layer.fill)}
-                  onChange={(color) => {
-                    updateLayer({ fill: color, stroke: color });
-                  }}
-                />
-              </div>
-              <div className="border-b border-gray-200" />
-              <div className="flex flex-col gap-2 p-4">
-                <span className="mb-2 text-[11px] font-medium">Stroke</span>
-                <ColorPicker
-                  value={colorToCss(layer.stroke)}
-                  onChange={(color) => {
-                    updateLayer({ stroke: color });
-                  }}
-                />
-              </div>
-              {layer.type === LayerType.Text && (
+
+              {/* === FEATURE 4: FREEFORM DRAWING (Customization for Path Brush Thickness) === */}
+              {layer.type === LayerType.Path && (
+                <>
+                  <div className="border-b border-gray-200"></div>
+                  <div className="flex flex-col gap-2 p-4">
+                    <span className="mb-2 text-[11px] font-medium">Brush Settings</span>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-[9px] font-medium text-gray-500">Stroke Size</p>
+                      <NumberInput
+                        value={layer.strokeWidth ?? 16}
+                        min={1}
+                        max={64}
+                        onChange={(number) => updateLayer({ strokeWidth: number })}
+                        classNames="w-full"
+                        icon={<p className="text-xs">px</p>}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* === FEATURE 3: CUSTOMIZATION (Fill Color) === */}
+              {layer.type !== LayerType.Image && layer.type !== LayerType.Line && (
                 <>
                   <div className="border-b border-gray-200" />
                   <div className="flex flex-col gap-2 p-4">
                     <span className="mb-2 text-[11px] font-medium">
-                      Typography
+                      {layer.type === LayerType.Path ? "Color" : "Fill"}
                     </span>
+                    <ColorPicker
+                      value={layer.fill ? colorToCss(layer.fill) : "#CCC"}
+                      onChange={(color) => {
+                        updateLayer({ fill: color, stroke: color });
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* === FEATURE 3: CUSTOMIZATION (Stroke Color, Width & Style) === */}
+              {layer.type !== LayerType.Image && (
+                <>
+                  <div className="border-b border-gray-200" />
+                  <div className="flex flex-col gap-2 p-4">
+                    <span className="mb-2 text-[11px] font-medium">Stroke</span>
+                    <ColorPicker
+                      value={layer.stroke ? colorToCss(layer.stroke) : "#CCC"}
+                      onChange={(color) => {
+                        updateLayer({ stroke: color });
+                      }}
+                    />
+
+                    {layer.type !== LayerType.Path && (
+                      <div className="mt-2 flex w-full gap-2">
+                        <div className="flex w-1/2 flex-col gap-1">
+                          <p className="text-[9px] font-medium text-gray-500">Width</p>
+                          <NumberInput
+                            value={layer.strokeWidth ?? 1}
+                            min={0}
+                            max={50}
+                            onChange={(number) => updateLayer({ strokeWidth: number })}
+                            classNames="w-full"
+                            icon={<p className="text-xs">W</p>}
+                          />
+                        </div>
+                        <div className="flex w-1/2 flex-col gap-1">
+                          <p className="text-[9px] font-medium text-gray-500">Style</p>
+                          <Dropdown
+                            value={layer.strokeStyle ?? "solid"}
+                            onChange={(val) => updateLayer({ strokeStyle: val })}
+                            options={["solid", "dashed"]}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Typography for Text layer */}
+              {layer.type === LayerType.Text && (
+                <>
+                  <div className="border-b border-gray-200" />
+                  <div className="flex flex-col gap-2 p-4">
+                    <span className="mb-2 text-[11px] font-medium">Typography</span>
                     <div className="flex flex-col gap-2">
                       <Dropdown
                         value={layer.fontFamily}
@@ -347,9 +448,7 @@ export default function Sidebars({
                       />
                       <div className="flex w-full gap-2">
                         <div className="flex w-full flex-col gap-1">
-                          <p className="text-[9px] font-medium text-gray-500">
-                            Size
-                          </p>
+                          <p className="text-[9px] font-medium text-gray-500">Size</p>
                           <NumberInput
                             value={layer.fontSize}
                             onChange={(number) => {
@@ -360,9 +459,7 @@ export default function Sidebars({
                           />
                         </div>
                         <div className="flex w-full flex-col gap-1">
-                          <p className="text-[9px] font-medium text-gray-500">
-                            Weight
-                          </p>
+                          <p className="text-[9px] font-medium text-gray-500">Weight</p>
                           <Dropdown
                             value={layer.fontWeight.toString()}
                             onChange={(value) => {
@@ -388,6 +485,7 @@ export default function Sidebars({
               )}
             </>
           ) : (
+            /* === FEATURE 3: CUSTOMIZATION (Page Background Color) === */
             <div className="flex flex-col gap-2 p-4">
               <span className="mb-2 text-[11px] font-medium">Page</span>
               <ColorPicker
@@ -401,22 +499,8 @@ export default function Sidebars({
           )}
         </div>
       ) : (
-        <div className="fixed right-3 top-3 flex h-[48px] w-[250px] items-center justify-between rounded-xl border bg-white pr-2">
-          <div className="max-36 flex w-full gap-2 overflow-x-scroll p-3 text-xs">
-            {me && (
-              <UserAvatar
-                color={connectionIdToColor(me.connectionId)}
-                name={me.info.name}
-              />
-            )}
-            {others.map((other) => (
-              <UserAvatar
-                key={other.connectionId}
-                color={connectionIdToColor(other.connectionId)}
-                name={other.info.name}
-              />
-            ))}
-          </div>
+        <div className="fixed right-3 top-3 z-20 flex h-[48px] min-w-[250px] items-center justify-between rounded-xl border border-gray-200 bg-white px-3 shadow-sm gap-3">
+          <ActiveUsers onFocusUser={onFocusUser} />
           <ShareMenu
             roomId={roomId}
             othersWithAccessToRoom={othersWithAccessToRoom}

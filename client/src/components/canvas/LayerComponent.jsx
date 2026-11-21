@@ -1,11 +1,18 @@
+/* === FEATURE 1: CREATING DIFFERENT SHAPES === */
+/* === FEATURE 2: UPLOADING IMAGES === */
+/* === FEATURE 4: FREEFORM DRAWING === */
 import { useStorage } from "@liveblocks/react";
 import { memo } from "react";
 import { LayerType } from "../../types";
 import Rectangle from "./Rectangle";
 import Ellipse from "./Ellipse";
+import Triangle from "./Triangle";
+import Star from "./Star";
+import Line from "./Line";
+import ImageLayer from "./ImageLayer";
 import Text from "./Text";
 import Path from "./Path";
-import { colorToCss, getLayer } from "../../utils";
+import { getLayer } from "../../utils";
 
 const LayerComponent = memo(({ id, onLayerPointerDown }) => {
   const layer = useStorage((root) => getLayer(root.layers, id));
@@ -14,18 +21,17 @@ const LayerComponent = memo(({ id, onLayerPointerDown }) => {
   }
 
   switch (layer.type) {
+    /* === FEATURE 4: FREEFORM DRAWING === */
     case LayerType.Path:
       return (
         <Path
-          onPointerDown={(e) => onLayerPointerDown(e, id)}
-          points={layer.points}
-          x={layer.x}
-          y={layer.y}
-          fill={layer.fill ? colorToCss(layer.fill) : "#CCC"}
-          stroke={layer.stroke ? colorToCss(layer.stroke) : "#CCC"}
-          opacity={layer.opacity}
+          id={id}
+          layer={layer}
+          onPointerDown={onLayerPointerDown}
         />
       );
+
+    /* === FEATURE 1: CREATING DIFFERENT SHAPES === */
     case LayerType.Rectangle:
       return (
         <Rectangle onPointerDown={onLayerPointerDown} id={id} layer={layer} />
@@ -34,8 +40,28 @@ const LayerComponent = memo(({ id, onLayerPointerDown }) => {
       return (
         <Ellipse onPointerDown={onLayerPointerDown} id={id} layer={layer} />
       );
+    case LayerType.Triangle:
+      return (
+        <Triangle onPointerDown={onLayerPointerDown} id={id} layer={layer} />
+      );
+    case LayerType.Star:
+      return (
+        <Star onPointerDown={onLayerPointerDown} id={id} layer={layer} />
+      );
+    case LayerType.Line:
+      return (
+        <Line onPointerDown={onLayerPointerDown} id={id} layer={layer} />
+      );
+
+    /* === FEATURE 2: UPLOADING IMAGES === */
+    case LayerType.Image:
+      return (
+        <ImageLayer onPointerDown={onLayerPointerDown} id={id} layer={layer} />
+      );
+
     case LayerType.Text:
       return <Text onPointerDown={onLayerPointerDown} id={id} layer={layer} />;
+
     default:
       return null;
   }

@@ -1,7 +1,9 @@
+/* === FEATURE 1: CREATING DIFFERENT SHAPES === */
+/* === FEATURE 3: CUSTOMIZATION (Fill, Stroke, Width, Style, Opacity) === */
 import { colorToCss } from "../../utils";
 
 export default function Ellipse({ id, layer, onPointerDown }) {
-  const { x, y, width, height, fill, stroke, opacity } = layer;
+  const { x, y, width, height, fill, stroke, opacity, strokeWidth, strokeStyle } = layer;
 
   return (
     <g className="group">
@@ -21,11 +23,12 @@ export default function Ellipse({ id, layer, onPointerDown }) {
         style={{ transform: `translate(${x}px, ${y}px)` }}
         fill={fill ? colorToCss(fill) : "#CCC"}
         stroke={stroke ? colorToCss(stroke) : "#CCC"}
+        strokeWidth={strokeWidth ?? 1}
+        strokeDasharray={strokeStyle === "dashed" ? "6 4" : undefined}
         cx={width / 2}
         cy={height / 2}
         rx={width / 2}
         ry={height / 2}
-        strokeWidth="1"
         opacity={`${opacity ?? 100}%`}
       />
     </g>

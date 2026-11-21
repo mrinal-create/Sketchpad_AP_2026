@@ -36,11 +36,14 @@ export function Room({ children, roomId }) {
           cursor: null,
           penColor: null,
           pencilDraft: null,
+          message: "",
+          cursorChat: null,
         }}
         initialStorage={{
           roomColor: { r: 30, g: 30, b: 30 },
           layers: new LiveMap(),
           layerIds: new LiveList([]),
+          comments: new LiveList([]),
         }}
       >
         <ClientSideSuspense

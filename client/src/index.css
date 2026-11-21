@@ -5,3 +5,42 @@
     font-family: "Inter", sans-serif;
   }
 }
+
+/* Custom styling for react-colorful inside the sidebars */
+.react-colorful {
+  width: 100% !important;
+  height: 140px !important;
+  border-radius: 8px !important;
+}
+
+.react-colorful__saturation {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.react-colorful__last-control {
+  border-radius: 0 0 8px 8px !important;
+}
+
+/* Collaborative reactions upward floating animation */
+@keyframes reactionFloat {
+  0% {
+    transform: translate(-50%, 0) scale(0.6);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-50%, -30px) scale(1.3);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(-50%, -70px) scale(1.1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -110px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.animate-reaction-float {
+  animation: reactionFloat 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

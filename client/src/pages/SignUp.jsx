@@ -14,20 +14,24 @@ export default function SignUp() {
     setErrorMessage("");
     setIsPending(true);
 
-    const { error } = await signUp.email({
-      email,
-      password,
-      name: email.split("@")[0] || "User", // Auto-fills Better Auth's required name field
-    });
+    try {
+      const { error } = await signUp.email({
+        email,
+        password,
+        name: email.split("@")[0] || "User", // Auto-fills Better Auth's required name field
+      });
 
-    setIsPending(false);
+      if (error) {
+        setErrorMessage(error.message || "Registration failed.");
+        return;
+      }
 
-    if (error) {
-      setErrorMessage(error.message || "Registration failed.");
-      return;
+      navigate("/dashboard");
+    } catch (err) {
+      setErrorMessage(err.message || "Registration failed. Please check your connection.");
+    } finally {
+      setIsPending(false);
     }
-
-    navigate("/dashboard");
   }
 
   return (
