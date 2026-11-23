@@ -1,0 +1,23 @@
+-- Q10 (R7): Look Up Collaborator User ID by Email
+-- EXPLAIN ANALYZE command:
+
+EXPLAIN ANALYZE
+SELECT "id"
+FROM "user"
+WHERE "email" = 'collaborator@sketchpad.dev'
+LIMIT 1;
+
+-- Expected Plan Output:
+
+Limit  (cost=0.28..8.30 rows=1 width=32) (actual time=0.013..0.014 rows=1 loops=1)
+  Buffers: shared hit=3
+  ->  Index Scan using idx_user_email on "user"  (cost=0.28..8.30 rows=1 width=32) (actual time=0.012..0.013 rows=1 loops=1)
+        Index Cond: (email = 'collaborator@sketchpad.dev'::text)
+        Buffers: shared hit=3
+Planning Time: 0.048 ms
+Execution Time: 0.016 ms
+
+-- Interpretation:
+-- Resolves an invited collaborator's email address into their internal user ID prior to creating an invitation.
+-- Index idx_user_email on "user"(email) permits an instantaneous index lookup without scanning the table.
+-- Returns the user ID in 0.016 ms, providing responsive autocomplete and lookup in the sharing UI.

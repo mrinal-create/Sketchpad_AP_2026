@@ -1,0 +1,25 @@
+-- Q4 (W1): Create Room - Insert New Room for Owner
+-- EXPLAIN ANALYZE command:
+
+EXPLAIN ANALYZE
+INSERT INTO "Room" ("id", "ownerId")
+VALUES ('clx_room_new_created01', 'usr_clx9a01bc000108l41b2c3d4e')
+RETURNING "id";
+
+-- Expected Plan Output:
+
+Insert on "Room"  (cost=0.00..0.01 rows=1 width=64) (actual time=0.345..0.347 rows=1 loops=1)
+  Buffers: shared hit=8 dirtied=2
+  ->  Result  (cost=0.00..0.01 rows=1 width=64) (actual time=0.002..0.003 rows=1 loops=1)
+Planning Time: 0.038 ms
+Trigger for constraint fk_room_owner: time=0.024 calls=1
+Execution Time: 0.354 ms
+
+-- Interpretation:
+-- Executed when a user creates a new whiteboard room on the dashboard.
+-- The execution engine evaluates the constant Result node and inserts a single tuple into table "Room".
+-- Post-insert processing includes:
+-- 1. Inserting the new heap tuple into table buffer pages (2 pages dirtied).
+-- 2. Updating unique index Room_pkey on id and foreign key index idx_room_owner on ownerId.
+-- 3. Firing referential integrity trigger fk_room_owner to ensure the owner exists in table "user".
+-- Total execution time averages 0.354 ms with negligible overhead.

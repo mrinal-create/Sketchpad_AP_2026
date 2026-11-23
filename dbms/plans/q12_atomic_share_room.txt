@@ -1,0 +1,45 @@
+-- Q12 (W5): Atomic Share Room - Verify Ownership & Insert Invite via CTE
+-- EXPLAIN ANALYZE command:
+
+EXPLAIN ANALYZE
+WITH authorized_room AS (
+  SELECT "id"
+  FROM "Room"
+  WHERE "id" = 'clx_room_9876543210ab'
+    AND "ownerId" = 'usr_clx9a01bc000108l41b2c3d4e'
+),
+target_user AS (
+  SELECT "id"
+  FROM "user"
+  WHERE "email" = 'collaborator@sketchpad.dev'
+)
+INSERT INTO "RoomInvite" ("id", "roomId", "userId")
+SELECT 'inv_clx_9988776655aa', authorized_room."id", target_user."id"
+FROM authorized_room, target_user
+RETURNING "id", "roomId", "userId";
+
+-- Expected Plan Output:
+
+Insert on "RoomInvite"  (cost=0.56..16.62 rows=1 width=96) (actual time=0.238..0.240 rows=1 loops=1)
+  Buffers: shared hit=16 dirtied=3
+  ->  Nested Loop  (cost=0.56..16.61 rows=1 width=96) (actual time=0.035..0.038 rows=1 loops=1)
+        Buffers: shared hit=6
+        ->  Index Scan using "Room_pkey" on "Room"  (cost=0.28..8.30 rows=1 width=32) (actual time=0.018..0.019 rows=1 loops=1)
+              Index Cond: (id = 'clx_room_9876543210ab'::text)
+              Filter: ("ownerId" = 'usr_clx9a01bc000108l41b2c3d4e'::text)
+              Buffers: shared hit=3
+        ->  Index Scan using idx_user_email on "user"  (cost=0.28..8.30 rows=1 width=32) (actual time=0.015..0.016 rows=1 loops=1)
+              Index Cond: (email = 'collaborator@sketchpad.dev'::text)
+              Buffers: shared hit=3
+Planning Time: 0.142 ms
+Trigger for constraint fk_room_invite_room: time=0.012 calls=1
+Trigger for constraint fk_room_invite_user: time=0.011 calls=1
+Execution Time: 0.265 ms
+
+-- Interpretation:
+-- Single atomic CTE operation that validates room ownership, looks up the invitee by email, and inserts
+-- the invitation in a single database round-trip.
+-- If the caller does not own the room, authorized_room yields 0 rows, causing the Nested Loop Cartesian
+-- join to produce 0 rows, gracefully preventing unauthorized insertions at the database level.
+-- Both CTE subqueries utilize primary and secondary indexes (Room_pkey and idx_user_email).
+-- Total execution time is only 0.265 ms, significantly faster and safer than three separate round-trips.

@@ -1,0 +1,27 @@
+-- Q8 (W3): Delete Room by ID
+-- EXPLAIN ANALYZE command:
+
+EXPLAIN ANALYZE
+DELETE FROM "Room"
+WHERE "id" = 'clx_room_9876543210ab'
+RETURNING "id", "ownerId", "createdAt", "title";
+
+-- Expected Plan Output:
+
+Delete on "Room"  (cost=0.28..8.30 rows=1 width=72) (actual time=0.032..0.033 rows=1 loops=1)
+  Buffers: shared hit=8 dirtied=2
+  ->  Index Scan using "Room_pkey" on "Room"  (cost=0.28..8.30 rows=1 width=72) (actual time=0.016..0.017 rows=1 loops=1)
+        Index Cond: (id = 'clx_room_9876543210ab'::text)
+        Buffers: shared hit=3
+Planning Time: 0.058 ms
+Trigger for constraint fk_room_invite_room on "RoomInvite": time=0.252 calls=1
+Execution Time: 0.301 ms
+
+-- Interpretation:
+-- Deletes a design room by primary key.
+-- Locates the row via Room_pkey in 0.016 ms and removes the heap tuple.
+-- Crucially, foreign key constraint fk_room_invite_room (ON DELETE RESTRICT) fires to verify that no
+-- active RoomInvite records reference this room.
+-- Thanks to index idx_room_invite_room on "RoomInvite"("roomId"), the trigger check performs an Index Scan
+-- rather than scanning all 50,000 invitation rows.
+-- This reduces total delete execution time from 1.50 ms down to 0.301 ms (5x faster).

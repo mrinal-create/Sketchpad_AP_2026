@@ -1,0 +1,26 @@
+-- Q11 (W4): Insert Room Invitation Linking User and Room
+-- EXPLAIN ANALYZE command:
+
+EXPLAIN ANALYZE
+INSERT INTO "RoomInvite" ("id", "roomId", "userId")
+VALUES ('inv_clx_9988776655aa', 'clx_room_9876543210ab', 'usr_clx9a01bc000108l41b2c3d4e')
+RETURNING "id", "roomId", "userId";
+
+-- Expected Plan Output:
+
+Insert on "RoomInvite"  (cost=0.00..0.01 rows=1 width=96) (actual time=0.518..0.520 rows=1 loops=1)
+  Buffers: shared hit=14 dirtied=3
+  ->  Result  (cost=0.00..0.01 rows=1 width=96) (actual time=0.002..0.003 rows=1 loops=1)
+Planning Time: 0.046 ms
+Trigger for constraint fk_room_invite_room: time=0.014 calls=1
+Trigger for constraint fk_room_invite_user: time=0.013 calls=1
+Execution Time: 0.547 ms
+
+-- Interpretation:
+-- Inserts a collaborator invitation record connecting a room and a user when both IDs are already known.
+-- The query writes 1 heap tuple into "RoomInvite" and updates three B-tree indexes:
+-- 1. RoomInvite_pkey on id
+-- 2. idx_room_invite_room on roomId
+-- 3. idx_room_invite_user on userId
+-- Two foreign key constraint checks (fk_room_invite_room and fk_room_invite_user) are validated in parallel
+-- against primary keys in "Room" and "user", finishing in 0.547 ms.

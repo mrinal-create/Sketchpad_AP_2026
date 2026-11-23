@@ -1,0 +1,26 @@
+-- Q13 (R8): Verify Room Ownership Before Revoking Access
+-- EXPLAIN ANALYZE command:
+
+EXPLAIN ANALYZE
+SELECT "id", "ownerId", "createdAt", "title"
+FROM "Room"
+WHERE "id" = 'clx_room_9876543210ab'
+  AND "ownerId" = 'usr_clx9a01bc000108l41b2c3d4e'
+LIMIT 1;
+
+-- Expected Plan Output:
+
+Limit  (cost=0.28..8.30 rows=1 width=72) (actual time=0.014..0.015 rows=1 loops=1)
+  Buffers: shared hit=3
+  ->  Index Scan using "Room_pkey" on "Room"  (cost=0.28..8.30 rows=1 width=72) (actual time=0.013..0.014 rows=1 loops=1)
+        Index Cond: (id = 'clx_room_9876543210ab'::text)
+        Filter: ("ownerId" = 'usr_clx9a01bc000108l41b2c3d4e'::text)
+        Buffers: shared hit=3
+Planning Time: 0.050 ms
+Execution Time: 0.017 ms
+
+-- Interpretation:
+-- Verifies that the room belongs to the requesting user before revoking a collaborator's invitation.
+-- Probes Room_pkey on id, evaluating the ownerId condition directly against buffer cache.
+-- Prevents unauthorized users from evicting collaborators from rooms they do not own.
+-- Execution finishes in 0.017 ms with zero disk I/O.

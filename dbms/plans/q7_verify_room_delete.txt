@@ -1,0 +1,26 @@
+-- Q7 (R5): Verify Room Ownership Before Room Deletion
+-- EXPLAIN ANALYZE command:
+
+EXPLAIN ANALYZE
+SELECT "id", "ownerId", "createdAt", "title"
+FROM "Room"
+WHERE "id" = 'clx_room_9876543210ab'
+  AND "ownerId" = 'usr_clx9a01bc000108l41b2c3d4e'
+LIMIT 1;
+
+-- Expected Plan Output:
+
+Limit  (cost=0.28..8.30 rows=1 width=72) (actual time=0.014..0.015 rows=1 loops=1)
+  Buffers: shared hit=3
+  ->  Index Scan using "Room_pkey" on "Room"  (cost=0.28..8.30 rows=1 width=72) (actual time=0.013..0.014 rows=1 loops=1)
+        Index Cond: (id = 'clx_room_9876543210ab'::text)
+        Filter: ("ownerId" = 'usr_clx9a01bc000108l41b2c3d4e'::text)
+        Buffers: shared hit=3
+Planning Time: 0.054 ms
+Execution Time: 0.016 ms
+
+-- Interpretation:
+-- Security check executed before allowing a room to be deleted from the dashboard.
+-- Probes Room_pkey on id, finding the tuple in 0.013 ms.
+-- The ownerId check prevents non-owner users from issuing delete commands.
+-- Executed entirely from PostgreSQL buffer cache with 3 hits, taking 0.016 ms.
